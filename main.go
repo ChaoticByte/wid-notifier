@@ -58,8 +58,10 @@ func main() {
 	}
 	// main loop
 	for {
+		t1 := time.Now().UnixMilli()
 		newNotices := []WidNotice{}
 		for _, a := range enabledApiEndpoints {
+			fmt.Printf("INFO\t%v Querying endpoint '%v' for new notices ...\n", time.Now().Format(time.RFC3339Nano), a.Id)
 			n, t, err := a.getNotices(persistent.data.(PersistentData).LastPublished[a.Id])
 			if err != nil {
 				// retry
@@ -74,10 +76,19 @@ func main() {
 				persistent.save()
 			}
 		}
-		// fmt.Println(newNotices)
-		for _, r := range config.Recipients {
-			r.filterAndSendNotices(newNotices, mailTemplate, mailAuth, config.SmtpConfiguration)
+		if len(newNotices) > 0 {
+			for _, r := range config.Recipients {
+				fmt.Printf("INFO\t%v Sending email notifications ...\n", time.Now().Format(time.RFC3339Nano))
+				err := r.filterAndSendNotices(newNotices, mailTemplate, mailAuth, config.SmtpConfiguration)
+				if err != nil {
+					fmt.Printf("ERROR\t%v\n", err)
+				} else {
+					fmt.Printf("INFO\t%v Email notifications sent.\n", time.Now().Format(time.RFC3339Nano))
+				}
+			}
 		}
-		time.Sleep(time.Second * time.Duration(config.ApiFetchInterval))
+		t2 := time.Now().UnixMilli()
+		dt := int(t2 - t1)
+		time.Sleep(time.Millisecond * time.Duration((config.ApiFetchInterval * 1000) - dt))
 	}
 }
