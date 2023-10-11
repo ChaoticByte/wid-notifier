@@ -31,7 +31,7 @@ Example:
     }
   ],
   "smtp": {
-    "from": "WID Notifier \u003cfrom@example.org\u003e",
+    "from": "from@example.org",
     "host": "example.org",
     "port": 587,
     "user": "from@example.org",

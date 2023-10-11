@@ -26,7 +26,7 @@ func NewConfig() Config {
 		PersistentDataFilePath: "data",
 		Recipients: []Recipient{},
 		SmtpConfiguration: SmtpSettings{
-			From: "WID Notifier <from@example.org>",
+			From: "from@example.org",
 			User: "from@example.org",
 			Password: "SiEhAbEnMiChInSgEsIcHtGeFiLmTdAsDüRfEnSiEnIcHt",
 			ServerHost: "example.org",
