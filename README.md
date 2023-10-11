@@ -143,19 +143,19 @@ All fields from the WidNotice struct can be used.
 
 ```go
 type WidNotice struct {
-	Uuid string
-	Name string
-	Title string
-	Published time.Time
-	Classification string
-	// optional fields (only fully supported by cert-bund)
-	Basescore int // -1 = unknown
-	Status string // "" = unknown
-	ProductNames []string // empty = unknown
-	Cves []string // empty = unknown
-	NoPatch string // "" = unknown
+  Uuid string
+  Name string
+  Title string
+  Published time.Time
+  Classification string
+  // optional fields (only fully supported by cert-bund)
+  Basescore int // -1 = unknown
+  Status string // "" = unknown
+  ProductNames []string // empty = unknown
+  Cves []string // empty = unknown
+  NoPatch string // "" = unknown
   // metadata
-	PortalUrl string
+  PortalUrl string
 }
 ```
 
