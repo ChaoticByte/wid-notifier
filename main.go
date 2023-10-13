@@ -79,15 +79,17 @@ func main() {
 			}
 		}
 		if len(newNotices) > 0 {
+			fmt.Printf("INFO\t%v Sending email notifications ...\n", time.Now().Format(time.RFC3339Nano))
+			recipientsNotified := 0
 			for _, r := range config.Recipients {
-				fmt.Printf("INFO\t%v Sending email notifications ...\n", time.Now().Format(time.RFC3339Nano))
 				err := r.filterAndSendNotices(newNotices, mailTemplate, mailAuth, config.SmtpConfiguration)
 				if err != nil {
 					fmt.Printf("ERROR\t%v\n", err)
 				} else {
-					fmt.Printf("INFO\t%v Email notifications sent.\n", time.Now().Format(time.RFC3339Nano))
+					recipientsNotified++
 				}
 			}
+			fmt.Printf("INFO\t%v Email notifications sent to %v of %v recipients.\n", time.Now().Format(time.RFC3339Nano), recipientsNotified, len(config.Recipients))
 		}
 		t2 := time.Now().UnixMilli()
 		dt := int(t2 - t1)
