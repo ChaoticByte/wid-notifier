@@ -19,6 +19,7 @@ type WidNotice struct {
 	Cves []string `json:"cves"` // empty = unknown
 	NoPatch string `json:"noPatch"` // "" = unknown
 	// metadata
+	ApiEndpointId string
 	PortalUrl string
 }
 

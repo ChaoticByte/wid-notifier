@@ -98,6 +98,7 @@ func parseApiResponse(data map[string]interface{}, apiEndpoint ApiEndpoint) []Wi
 			Name: d["name"].(string),
 			Title: d["title"].(string),
 			Classification: d["classification"].(string),
+			ApiEndpointId: apiEndpoint.Id,
 		}
 		published, err := time.Parse(PUBLISHED_TIME_FORMAT, d["published"].(string))
 		if err != nil {

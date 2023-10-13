@@ -9,6 +9,13 @@ A tool that sends configurable email notifications for
 
 This Software only supports Linux.
 
+## Supported API Endpoints
+
+| ID     | Portal URL                                            |
+|--------|-------------------------------------------------------|
+| `bund` | https://wid.cert-bund.de/portal/wid/kurzinformationen |
+| `bay`  | https://wid.lsi.bayern.de/portal/wid/warnmeldungen    |
+
 # Config
 
 Example:
@@ -57,7 +64,8 @@ You must filter the notices to be sent per user. Multiple filters can be set per
     "min_basescore": 0,
     "status": "",
     "products_contain": "",
-    "no_patch": ""
+    "no_patch": "",
+    "api_endpoint": ""
   },
   ...
 ]
@@ -135,6 +143,10 @@ If set to `"false"`, notices where no patch is available will be included.
 
 If set to `""`, this criteria will be ignored.
 
+### api_endpoint
+
+Includes notices from the given [API Endpoint](#supported-api-endpoints).
+
 ## Templates
 
 The syntax for the mail templates is described [here](https://pkg.go.dev/text/template).
@@ -155,6 +167,7 @@ type WidNotice struct {
   Cves []string // empty = unknown
   NoPatch string // "" = unknown
   // metadata
+  ApiEndpointId string
   PortalUrl string
 }
 ```

@@ -12,6 +12,7 @@ type Filter struct {
 	Status string `json:"status"`
 	ProductsContain string `json:"products_contain"`
 	NoPatch string `json:"no_patch"`
+	ApiEndpointId string `json:"api_endpoint"`
 }
 
 func (f Filter) filter(notices []WidNotice) []WidNotice {
@@ -39,6 +40,9 @@ func (f Filter) filter(notices []WidNotice) []WidNotice {
 			}
 			if f.NoPatch != "" {
 				matches = append(matches, f.NoPatch == n.NoPatch)
+			}
+			if f.ApiEndpointId != "" {
+				matches = append(matches, f.ApiEndpointId == n.ApiEndpointId)
 			}
 		}
 		allMatch := len(matches) > 0
