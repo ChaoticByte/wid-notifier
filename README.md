@@ -65,7 +65,17 @@ Example:
 
 ## Filters
 
-You must filter the notices to be sent per user. Multiple filters can be set per user and multiple criteria can be defined per filter.
+You define filters for notices to be sent per recipient. Multiple filters can be set per recipient and multiple criteria can be used per filter. The configuration field for those filters is `include`. See [Configuration](#configuration) for an example.
+
+If a notice is included is determined by the following logic:
+
+```
+{criteria, criteria, ... ALL APPLY}
+OR {criteria, criteria, ... ALL APPLY}
+OR ...
+```
+
+The following criteria are available. Criteria marked with `*` are for optional fields that are not supported by every API endpoint (e.g. https://wid.lsi.bayern.de) - notices from those endpoints will therefore not be included when using those criteria in filters.
 
 ```json
 "include": [
@@ -83,14 +93,12 @@ You must filter the notices to be sent per user. Multiple filters can be set per
 ]
 ```
 
-The following filter criteria are supported. Criteria marked with `*` are for optional fields that are not supported by every API endpoint (e.g. https://wid.lsi.bayern.de) - notices from those endpoints will therefore not be included when using those filters.
-
 ### any
 
 Includes all notices if set to `true`.
 
 ```json
-{"any": true}
+"any": true
 ```
 
 ### title_contains
@@ -98,7 +106,7 @@ Includes all notices if set to `true`.
 Include notices whose title contains this text.
 
 ```json
-{"title_contains": "Denial Of Service"}
+"title_contains": "Denial Of Service"
 ```
 If set to `""`, this criteria will be ignored.
 
@@ -108,7 +116,7 @@ Include notices whose classification is in this list.
 Classification can be `"kritisch"`, `"hoch"`, `"mittel"` or `"niedrig"`.
 
 ```json
-{"classification": "hoch"}
+"classification": "hoch"
 ```
 If set to `""`, this criteria will be ignored.
 
@@ -117,7 +125,7 @@ If set to `""`, this criteria will be ignored.
 Include notices whose basescore (`0` - `100`) is >= `min_basescore`.
 
 ```json
-{"min_basescore": 40}
+"min_basescore": 40
 ```
 This criteria will be ignored if set to `0`.
 
@@ -126,7 +134,7 @@ This criteria will be ignored if set to `0`.
 Include notices with this status. This is usually either `NEU` or `UPDATE`.
 
 ```json
-{"status": "NEU"}
+"status": "NEU"
 ```
 If set to `""`, this criteria will be ignored.
 
@@ -135,7 +143,7 @@ If set to `""`, this criteria will be ignored.
 Include notices whose product list contains this text.
 
 ```json
-{"products_contain": "Debian Linux"}
+"products_contain": "Debian Linux"
 ```
 If set to `""`, this criteria will be ignored.
 
@@ -144,13 +152,13 @@ If set to `""`, this criteria will be ignored.
 If set to `"true"`, notices where no patch is available will be included.
 
 ```json
-{"no_patch": "true"}
+"no_patch": "true"
 ```
 
 If set to `"false"`, notices where no patch is available will be included.
 
 ```json
-{"no_patch": "false"}
+"no_patch": "false"
 ```
 
 If set to `""`, this criteria will be ignored.
@@ -158,6 +166,12 @@ If set to `""`, this criteria will be ignored.
 ### api_endpoint
 
 Includes notices from the given [API Endpoint](#api-endpoints).
+
+```json
+"api_endpoint": "bund"
+```
+
+If set to `""`, this criteria will be ignored.
 
 ## Templates
 
