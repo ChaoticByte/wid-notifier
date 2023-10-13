@@ -1,22 +1,34 @@
 # WID Notifier
 
-A tool that sends configurable email notifications for
+The German [BSI](https://www.bsi.bund.de/) and [LSI Bavaria](https://lsi.bayern.de/) each have a page listing current security notices.
 
-- https://wid.cert-bund.de/portal/wid/kurzinformationen
-- https://wid.lsi.bayern.de/portal/wid/warnmeldungen
+- BSI: https://wid.cert-bund.de/portal/wid/kurzinformationen
+- LSI: https://wid.lsi.bayern.de/portal/wid/warnmeldungen
+
+This software queries the APIs of these services for new security notices and sends configurable email notifications.
 
 ## Supported Platforms
 
 This Software only supports Linux.
 
-## Supported API Endpoints
+## API Endpoints
 
-| ID     | Portal URL                                            |
-|--------|-------------------------------------------------------|
-| `bund` | https://wid.cert-bund.de/portal/wid/kurzinformationen |
-| `bay`  | https://wid.lsi.bayern.de/portal/wid/warnmeldungen    |
+|     | ID     | Portal URL                                            |
+|-----|--------|-------------------------------------------------------|
+| BSI | `bund` | https://wid.cert-bund.de/portal/wid/kurzinformationen |
+| LSI | `bay`  | https://wid.lsi.bayern.de/portal/wid/warnmeldungen    |
 
-# Config
+# Usage
+
+After building the application using `go build`, run
+
+```bash
+./wid-notifier <configfile>
+```
+
+where `<configfile>` is the path of your configuration file. If you don't have a config file yet, the software will create an initial config at the given location. See [Configuration](#configuration) for more info.
+
+# Configuration
 
 Example:
 
@@ -145,9 +157,11 @@ If set to `""`, this criteria will be ignored.
 
 ### api_endpoint
 
-Includes notices from the given [API Endpoint](#supported-api-endpoints).
+Includes notices from the given [API Endpoint](#api-endpoints).
 
 ## Templates
+
+If you don't like the default appearance of the notification mails, you can write your own templates for the mail subject and body.
 
 The syntax for the mail templates is described [here](https://pkg.go.dev/text/template).
 
