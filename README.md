@@ -42,7 +42,7 @@ Example:
   "datafile": "data",
   "recipients": [
     {
-      "address": "guenther@example.org",,
+      "address": "guenther@example.org",
       "include": [
         {"classification": "kritisch"},
         {"title_contains": "jQuery"}
