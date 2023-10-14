@@ -64,11 +64,13 @@ func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTempla
 		}
 	}
 	slices.Reverse(filteredNotices)
+	logger.debug(fmt.Sprintf("Including %v of %v notices for recipient %v", len(filteredNotices), len(notices), r.Address))
+	logger.debug("Templating and sending mails for recipient " + r.Address + " ...")
 	for _, n := range filteredNotices {
 		mailContent, err := template.generate(n)
 		if err != nil {
-			fmt.Println("ERROR\tCould not create mail from template.")
-			fmt.Println(err)
+			logger.error("Could not create mail from template")
+			logger.error(err)
 		}
 		// serialize & send mail
 		data := mailContent.serializeValidMail(smtpConfig.From, r.Address)
@@ -82,8 +84,8 @@ func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTempla
 		if err != nil {
 			return err
 		}
-		// fmt.Printf("%v", strings.ReplaceAll(string(data), "\r", "\\r"))
 	}
+	logger.debug("Sent all mails for recipient " + r.Address)
 	return nil
 }
 

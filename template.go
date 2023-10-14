@@ -4,7 +4,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"text/template"
 )
 
@@ -58,12 +57,12 @@ func (t MailTemplate) generate(notice WidNotice) (MailContent, error) {
 func NewTemplateFromTemplateConfig(tc MailTemplateConfig) MailTemplate {
 	subjectTemplate, err := template.New("subject").Parse(tc.SubjectTemplate)
 	if err != nil {
-		fmt.Println("ERROR\tCould not parse template.")
+		logger.error("Could not parse template")
 		panic(err)
 	}
 	bodyTemplate, err := template.New("body").Parse(tc.BodyTemplate)
 	if err != nil {
-		fmt.Println("ERROR\tCould not parse template.")
+		logger.error("Could not parse template")
 		panic(err)
 	}
 	return MailTemplate{

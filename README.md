@@ -31,11 +31,12 @@ Example:
 ```json
 {
   "api_fetch_interval": 600,
+  "datafile": "data",
   "enabled_api_endpoints": [
     "bay",
     "bund"
   ],
-  "datafile": "data",
+  "loglevel": 2,
   "recipients": [
     {
       "address": "guenther@example.org",
@@ -58,6 +59,8 @@ Example:
   }
 }
 ```
+
+To show debug messages, set the `loglevel` to `3`.
 
 ## Filters
 

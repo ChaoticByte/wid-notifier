@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/fs"
 	"os"
 	"time"
@@ -15,6 +14,7 @@ type Config struct {
 	ApiFetchInterval int `json:"api_fetch_interval"` // in seconds
 	EnabledApiEndpoints []string `json:"enabled_api_endpoints"`
 	PersistentDataFilePath string `json:"datafile"`
+	LogLevel int `json:"loglevel"`
 	Recipients []Recipient `json:"recipients"`
 	SmtpConfiguration SmtpSettings `json:"smtp"`
 	Template MailTemplateConfig `json:"template"`
@@ -26,6 +26,7 @@ func NewConfig() Config {
 		ApiFetchInterval: 60 * 10, // every 10 minutes,
 		EnabledApiEndpoints: []string{"bay", "bund"},
 		PersistentDataFilePath: "data",
+		LogLevel: 2,
 		Recipients: []Recipient{},
 		SmtpConfiguration: SmtpSettings{
 			From: "from@example.org",
@@ -43,21 +44,21 @@ func NewConfig() Config {
 
 func checkConfig(config Config) {
 	if len(config.Recipients) < 1 {
-		fmt.Println("ERROR\tConfiguration is incomplete.")
+		logger.error("Configuration is incomplete")
 		panic(errors.New("no recipients are configured"))
 	}
 	for _, r := range config.Recipients {
 		if !mailAddressIsValid(r.Address) {
-			fmt.Println("ERROR\tConfiguration includes invalid data.")
+			logger.error("Configuration includes invalid data")
 			panic(errors.New("'" + r.Address + "' is not a valid e-mail address"))
 		}
 		if len(r.Filters) < 1 {
-			fmt.Println("ERROR\tConfiguration is incomplete.")
+			logger.error("Configuration is incomplete")
 			panic(errors.New("recipient " + r.Address + " has no filter defined - at least {'any': true/false} should be configured"))
 		}
 	}
 	if !mailAddressIsValid(config.SmtpConfiguration.From) {
-		fmt.Println("ERROR\tConfiguration includes invalid data.")
+		logger.error("Configuration includes invalid data")
 		panic(errors.New("'" + config.SmtpConfiguration.From + "' is not a valid e-mail address"))
 	}
 }

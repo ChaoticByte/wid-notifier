@@ -66,7 +66,7 @@ func (e ApiEndpoint) getNotices(since time.Time) ([]WidNotice, time.Time, error)
 			}
 			notices = parseApiResponse(decodedData, e)
 		} else {
-			fmt.Printf("ERROR\tGet \"%v\": %v\n", url, res.Status)
+			logger.error(fmt.Sprintf("Get \"%v\": %v\n", url, res.Status))
 			return nil, time.Time{}, err
 		}
 	} else {
@@ -104,7 +104,7 @@ func parseApiResponse(data map[string]interface{}, apiEndpoint ApiEndpoint) []Wi
 		}
 		published, err := time.Parse(PUBLISHED_TIME_FORMAT, d["published"].(string))
 		if err != nil {
-			fmt.Println("ERROR\t", err)
+			logger.error(err)
 		}
 		notice.Published = published
 		// optional fields
