@@ -66,7 +66,7 @@ To show debug messages, set the `loglevel` to `3`.
 
 You define filters for notices to be sent per recipient. Multiple filters can be set per recipient and multiple criteria can be used per filter. The configuration field for those filters is `include`. See [Configuration](#configuration) for an example.
 
-If a notice is included is determined by the following logic:
+It is determined by the following logic, if a notice is included:
 
 ```
 {criteria, criteria, ... ALL APPLY}

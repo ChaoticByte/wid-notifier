@@ -65,7 +65,7 @@ func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTempla
 	}
 	slices.Reverse(filteredNotices)
 	logger.debug(fmt.Sprintf("Including %v of %v notices for recipient %v", len(filteredNotices), len(notices), r.Address))
-	logger.debug("Templating and sending mails for recipient " + r.Address + " ...")
+	logger.debug("Generating and sending mails to " + r.Address + " ...")
 	for _, n := range filteredNotices {
 		mailContent, err := template.generate(n)
 		if err != nil {
@@ -85,7 +85,7 @@ func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTempla
 			return err
 		}
 	}
-	logger.debug("Sent all mails for recipient " + r.Address)
+	logger.debug("Successfully sent all mails to " + r.Address)
 	return nil
 }
 
