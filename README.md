@@ -1,15 +1,7 @@
 # WID Notifier
 
-The German [BSI](https://www.bsi.bund.de/) and [LSI Bavaria](https://lsi.bayern.de/) each have a page listing current security notices.
-
-- BSI: https://wid.cert-bund.de/portal/wid/kurzinformationen
-- LSI: https://wid.lsi.bayern.de/portal/wid/warnmeldungen
-
+The German [BSI](https://www.bsi.bund.de/) and [LSI Bavaria](https://lsi.bayern.de/) each have a page listing current security notices.  
 This software queries the APIs of these services for new security notices and sends configurable email notifications.
-
-## Supported Platforms
-
-This Software only supports Linux.
 
 ## API Endpoints
 
@@ -17,6 +9,10 @@ This Software only supports Linux.
 |-----|--------|-------------------------------------------------------|
 | BSI | `bund` | https://wid.cert-bund.de/portal/wid/kurzinformationen |
 | LSI | `bay`  | https://wid.lsi.bayern.de/portal/wid/warnmeldungen    |
+
+## Supported Platforms
+
+This Software only supports Linux.
 
 # Usage
 
