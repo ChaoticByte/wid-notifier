@@ -71,6 +71,7 @@ func main() {
 	for {
 		t1 := time.Now().UnixMilli()
 		newNotices := []WidNotice{}
+		cache := map[string][]byte{}
 		for _, a := range enabledApiEndpoints {
 			logger.info("Querying endpoint '" + a.Id + "' for new notices ...")
 			n, t, err := a.getNotices(persistent.data.(PersistentData).LastPublished[a.Id])
@@ -95,7 +96,7 @@ func main() {
 			logger.info("Sending email notifications ...")
 			recipientsNotified := 0
 			for _, r := range config.Recipients {
-				err := r.filterAndSendNotices(newNotices, mailTemplate, mailAuth, config.SmtpConfiguration)
+				err := r.filterAndSendNotices(newNotices, mailTemplate, mailAuth, config.SmtpConfiguration, &cache)
 				if err != nil {
 					logger.error(err)
 				} else {

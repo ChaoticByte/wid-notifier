@@ -54,7 +54,7 @@ type SmtpSettings struct {
 	Password string `json:"password"`
 }
 
-func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings) error {
+func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, cache *map[string][]byte) error {
 	filteredNotices := []WidNotice{}
 	for _, f := range r.Filters {
 		for _, n := range f.filter(notices) {
@@ -66,15 +66,27 @@ func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTempla
 	slices.Reverse(filteredNotices)
 	logger.debug(fmt.Sprintf("Including %v of %v notices for recipient %v", len(filteredNotices), len(notices), r.Address))
 	logger.debug("Generating and sending mails to " + r.Address + " ...")
+	cacheHits := 0
+	cacheMisses := 0
 	for _, n := range filteredNotices {
-		mailContent, err := template.generate(n)
-		if err != nil {
-			logger.error("Could not create mail from template")
-			logger.error(err)
+		var data []byte
+		cacheResult := (*cache)[n.Uuid]
+		if len(cacheResult) > 0 {
+			cacheHits++
+			data = cacheResult
+		} else {
+			cacheMisses++
+			mailContent, err := template.generate(n)
+			if err != nil {
+				logger.error("Could not create mail from template")
+				logger.error(err)
+			}
+			// serialize & send mail
+			data = mailContent.serializeValidMail(smtpConfig.From, r.Address)
+			// add to cache
+			(*cache)[n.Uuid] = data
 		}
-		// serialize & send mail
-		data := mailContent.serializeValidMail(smtpConfig.From, r.Address)
-		err = smtp.SendMail(
+		err := smtp.SendMail(
 			fmt.Sprintf("%v:%v", smtpConfig.ServerHost, smtpConfig.ServerPort),
 			auth,
 			smtpConfig.From,
@@ -85,6 +97,7 @@ func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTempla
 			return err
 		}
 	}
+	logger.debug(fmt.Sprintf("%v mail cache hits, %v misses", cacheHits, cacheMisses))
 	logger.debug("Successfully sent all mails to " + r.Address)
 	return nil
 }
