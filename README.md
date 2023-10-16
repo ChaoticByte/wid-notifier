@@ -14,9 +14,12 @@ This software queries the APIs of these services for new security notices and se
 
 This Software only supports Linux.
 
-# Usage
+# Build
 
-After building the application using `go build`, run
+To cross-compile the software for `i386`, `amd64`, `arm` and `arm64`, run `build.sh`.  
+You need a go version >= 1.21 and git.
+
+# Usage
 
 ```bash
 ./wid-notifier <configfile>
