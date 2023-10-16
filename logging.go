@@ -40,8 +40,8 @@ func (l *Logger) debug(msg any) {
 func NewLogger(loglevel int) Logger {
 	l := Logger{}
 	l.LogLevel = loglevel
-	l.ErrorLogger 	= log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
-	l.WarningLogger = log.New(os.Stderr, "WARN  ", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
+	l.ErrorLogger 	= log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lmicroseconds)
+	l.WarningLogger = log.New(os.Stderr, "WARN  ", log.Ldate|log.Ltime|log.Lmicroseconds)
 	l.InfoLogger 	= log.New(os.Stderr, "INFO  ", log.Ldate|log.Ltime|log.Lmicroseconds)
 	l.DebugLogger 	= log.New(os.Stderr, "DEBUG ", log.Ldate|log.Ltime|log.Lmicroseconds)
 	return l
