@@ -20,7 +20,7 @@
 # Go workspace file
 go.work
 
+dist/
 data
 config
 *.bak
-wid-notifier
