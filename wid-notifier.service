@@ -1,0 +1,13 @@
+[Unit]
+After=network.target network-online.target
+Requires=network-online.target
+Description=WID Notifier
+
+[Service]
+User=widnotifier
+Group=widnotifier
+WorkingDirectory=~
+ExecStart=/usr/bin/wid-notifier /etc/widnotifier
+
+[Install]
+WantedBy=multi-user.target
