@@ -8,12 +8,10 @@ import (
 )
 
 const DEFAULT_SUBJECT_TEMPLATE = "{{ if .Status }}{{.Status}} {{ end }}[{{.Classification}}] {{.Title}}"
-const DEFAULT_BODY_TEMPLATE = `{{.Name}} - "{{.Title}}" with classification '{{.Classification}}'
-Link: {{.PortalUrl}}
+const DEFAULT_BODY_TEMPLATE = `{{.Name}}
+{{.PortalUrl}}
 
 Published: {{.Published}}
-{{ if .Status }}Status: {{.Status}}
-{{ end -}}
 {{ if gt .Basescore -1 }}Basescore: {{.Basescore}}
 {{ end -}}
 {{ if eq .NoPatch "true" }}There is no patch available at the moment!
