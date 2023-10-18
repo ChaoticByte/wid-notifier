@@ -41,7 +41,7 @@ type ApiEndpoint struct {
 }
 
 func (e ApiEndpoint) getNotices(since time.Time) ([]WidNotice, time.Time, error) {
-	// returns a slice of WidNotice and the 'published' field of the last notice
+	// returns a slice of WidNotice and the 'published' field of the last notice, and the error (or nil)
 	var notices []WidNotice = []WidNotice{}
 	var err error
 	params := defaultParams
@@ -58,19 +58,19 @@ func (e ApiEndpoint) getNotices(since time.Time) ([]WidNotice, time.Time, error)
 		if res.StatusCode == 200 {
 			resBody, err := io.ReadAll(res.Body)
 			if err != nil {
-				return nil, time.Time{}, err
+				return []WidNotice{}, since, err
 			}
 			var decodedData map[string]interface{}
 			if err = json.Unmarshal(resBody, &decodedData); err != nil {
-				return nil, time.Time{}, err
+				return []WidNotice{}, since, err
 			}
 			notices = parseApiResponse(decodedData, e)
 		} else {
 			logger.error(fmt.Sprintf("Get \"%v\": %v\n", url, res.Status))
-			return nil, time.Time{}, err
+			return []WidNotice{}, since, err
 		}
 	} else {
-		return nil, time.Time{}, err
+		return []WidNotice{}, since, err
 	}
 	if len(notices) > 0 {
 		// And here the filtering begins. yay -.-
@@ -87,7 +87,7 @@ func (e ApiEndpoint) getNotices(since time.Time) ([]WidNotice, time.Time, error)
 		}
 		return noticesFiltered, lastPublished, nil
 	} else {
-		return nil, time.Time{}, nil
+		return []WidNotice{}, since, nil
 	}
 }
 

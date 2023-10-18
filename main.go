@@ -85,7 +85,7 @@ func main() {
 				// ok then...
 				logger.error("Couldn't query notices from API endpoint '" + a.Id + "'")
 				logger.error(err)
-			} else {
+			} else if len(n) > 0 {
 				newNotices = append(newNotices, n...)
 				persistent.data.(PersistentData).LastPublished[a.Id] = t
 				persistent.save()
