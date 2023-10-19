@@ -14,14 +14,14 @@ import (
 // known API endpoints
 var apiEndpoints []ApiEndpoint = []ApiEndpoint{
 	{
-		Id: "bund",
-		EndpointUrl: "https://wid.cert-bund.de/content/public/securityAdvisory",
-		PortalUrl: "https://wid.cert-bund.de/portal/wid/securityadvisory",
-	},
-	{
 		Id: "bay",
 		EndpointUrl: "https://wid.lsi.bayern.de/content/public/securityAdvisory",
 		PortalUrl: "https://wid.lsi.bayern.de/portal/wid/securityadvisory",
+	},
+	{
+		Id: "bund",
+		EndpointUrl: "https://wid.cert-bund.de/content/public/securityAdvisory",
+		PortalUrl: "https://wid.cert-bund.de/portal/wid/securityadvisory",
 	},
 }
 
