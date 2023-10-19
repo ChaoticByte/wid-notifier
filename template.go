@@ -7,23 +7,26 @@ import (
 	"text/template"
 )
 
-const DEFAULT_SUBJECT_TEMPLATE = "{{ if .Status }}{{.Status}} {{ end }}[{{.Classification}}] {{.Title}}"
-const DEFAULT_BODY_TEMPLATE = `{{.Name}}
-{{.PortalUrl}}
+const DEFAULT_SUBJECT_TEMPLATE = "[{{ .Classification }}] {{ .Title }}"
+const DEFAULT_BODY_TEMPLATE = `{{ if .Status }}[{{ .Status }}] {{ end }}{{ .Name }}
+-> {{ .PortalUrl }}
+{{- if eq .NoPatch "true" }}
 
-Published: {{.Published}}
-{{ if gt .Basescore -1 }}Basescore: {{.Basescore}}
-{{ end -}}
-{{ if eq .NoPatch "true" }}There is no patch available at the moment!
-{{ end }}
-Affected Products:
-{{ range $product := .ProductNames }}  - {{ $product }}
-{{ else }}  unknown
-{{ end }}
-Assigned CVEs:
-{{ range $cve := .Cves }}  - {{ $cve }}
-{{ else }}  unknown
-{{ end }}`
+No patch available!
+{{- end }}
+{{ if gt .Basescore -1 }}
+Basescore: {{ .Basescore }}{{- end }}
+Published: {{ .Published }}
+{{- if .ProductNames }}
+
+Affected Products:{{ range $product := .ProductNames }}
+  - {{ $product }}
+{{- end }}{{ end }}
+{{- if .Cves }}
+
+Assigned CVEs:{{ range $cve := .Cves }}
+  - {{ $cve }} -> https://www.cve.org/CVERecord?id={{ $cve }}
+{{- end }}{{ end }}`
 
 type MailTemplateConfig struct {
 	SubjectTemplate string `json:"subject"`
