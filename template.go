@@ -42,15 +42,11 @@ func (t MailTemplate) generate(notice WidNotice) (MailContent, error) {
 	c := MailContent{}
 	buffer := &bytes.Buffer{}
 	err := t.SubjectTemplate.Execute(buffer, notice)
-	if err != nil {
-		return c, err
-	}
+	if err != nil { return c, err }
 	c.Subject = buffer.String()
 	buffer.Truncate(0) // we can recycle our buffer
 	err = t.BodyTemplate.Execute(buffer, notice)
-	if err != nil {
-		return c, err
-	}
+	if err != nil { return c, err }
 	c.Body = buffer.String()
 	return c, nil
 }

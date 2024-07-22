@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"os"
+	"slices"
 	"time"
 )
 
@@ -24,17 +25,13 @@ func main() {
 	// init
 	logger.info("Initializing ...")
 	defer logger.info("Exiting ...")
+	// open & check config
 	config := NewDataStore(
 		configFilePath,
 		NewConfig(),
 		true,
 		0600,
 	).data.(Config)
-	persistent := NewDataStore(
-		config.PersistentDataFilePath,
-		NewPersistentData(config),
-		false,
-		0640)
 	logger.LogLevel = config.LogLevel
 	logger.debug("Checking configuration file ...")
 	checkConfig(config)
@@ -66,6 +63,12 @@ func main() {
 			}
 		}
 	}
+	// open data file
+	persistent := NewDataStore(
+		config.PersistentDataFilePath,
+		NewPersistentData(config),
+		false,
+		0640)
 	// main loop
 	logger.debug("Entering main loop ...")
 	for {
@@ -76,7 +79,7 @@ func main() {
 			logger.info("Querying endpoint '" + a.Id + "' for new notices ...")
 			n, t, err := a.getNotices(persistent.data.(PersistentData).LastPublished[a.Id])
 			if err != nil {
-				// retry
+				// retry (once)
 				logger.warn("Couldn't query notices from API endpoint '" + a.Id + "'. Retrying ...")
 				logger.warn(err)
 				n, t, err = a.getNotices(persistent.data.(PersistentData).LastPublished[a.Id])
@@ -96,7 +99,19 @@ func main() {
 			logger.info("Sending email notifications ...")
 			recipientsNotified := 0
 			for _, r := range config.Recipients {
-				err := r.filterAndSendNotices(newNotices, mailTemplate, mailAuth, config.SmtpConfiguration, &cache)
+				// Filter notices for this recipient
+				filteredNotices := []WidNotice{}
+				for _, f := range r.Filters {
+					for _, n := range f.filter(newNotices) {
+						if !noticeSliceContains(filteredNotices, n) {
+							filteredNotices = append(filteredNotices, n)
+						}
+					}
+				}
+				slices.Reverse(filteredNotices)
+				logger.debug(fmt.Sprintf("Including %v of %v notices for recipient %v", len(filteredNotices), len(newNotices), r.Address))
+				// Send notices
+				err := r.sendNotices(filteredNotices, mailTemplate, mailAuth, config.SmtpConfiguration, &cache)
 				if err != nil {
 					logger.error(err)
 				} else {
@@ -105,8 +120,7 @@ func main() {
 			}
 			logger.info(fmt.Sprintf("Email notifications sent to %v of %v recipients", recipientsNotified, len(config.Recipients)))
 		}
-		t2 := time.Now().UnixMilli()
-		dt := int(t2 - t1)
+		dt := int(time.Now().UnixMilli() - t1)
 		time.Sleep(time.Millisecond * time.Duration((config.ApiFetchInterval * 1000) - dt))
 	}
 }

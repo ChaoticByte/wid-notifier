@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/mail"
 	"net/smtp"
-	"slices"
 	"time"
 )
 
@@ -49,22 +48,12 @@ type SmtpSettings struct {
 	Password string `json:"password"`
 }
 
-func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, cache *map[string][]byte) error {
-	filteredNotices := []WidNotice{}
-	for _, f := range r.Filters {
-		for _, n := range f.filter(notices) {
-			if !noticeSliceContains(filteredNotices, n) {
-				filteredNotices = append(filteredNotices, n)
-			}
-		}
-	}
-	slices.Reverse(filteredNotices)
-	logger.debug(fmt.Sprintf("Including %v of %v notices for recipient %v", len(filteredNotices), len(notices), r.Address))
+func (r Recipient) sendNotices(notices []WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, cache *map[string][]byte) error {
 	logger.debug("Generating and sending mails to " + r.Address + " ...")
 	cacheHits := 0
 	cacheMisses := 0
 	mails := [][]byte{}
-	for _, n := range filteredNotices {
+	for _, n := range notices {
 		var data []byte
 		cacheResult := (*cache)[n.Uuid]
 		if len(cacheResult) > 0 {
@@ -91,9 +80,7 @@ func (r Recipient) filterAndSendNotices(notices []WidNotice, template MailTempla
 		r.Address,
 		mails,
 	)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	logger.debug("Successfully sent all mails to " + r.Address)
 	return nil
 }
@@ -102,50 +89,34 @@ func sendMails(smtpConf SmtpSettings, auth smtp.Auth, to string, data [][]byte) 
 	addr := fmt.Sprintf("%v:%v", smtpConf.ServerHost, smtpConf.ServerPort)
 	logger.debug("Connecting to mail server at " + addr + " ...")
 	connection, err := smtp.Dial(addr)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	defer connection.Close()
 	// can leave out connection.Hello
 	hasTlsExt, _ := connection.Extension("starttls")
 	if hasTlsExt {
 		err = connection.StartTLS(&tls.Config{ServerName: smtpConf.ServerHost})
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		logger.debug("Mail Server supports TLS")
 	} else {
 		logger.debug("Mail Server doesn't support TLS")
 	}
 	logger.debug("Authenticating to mail server ...")
 	err = connection.Auth(auth)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	if logger.LogLevel >= 3 {
 		fmt.Printf("DEBUG %v Sending mails to server ", time.Now().Format("2006/01/02 15:04:05.000000"))
 	}
 	for _, d := range data {
 		err = connection.Mail(smtpConf.From)
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		err = connection.Rcpt(to)
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		writer, err := connection.Data()
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		_, err = writer.Write(d)
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		err = writer.Close()
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		if logger.LogLevel >= 3 {
 			print(".")
 		}

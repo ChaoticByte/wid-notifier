@@ -4,78 +4,9 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"io/fs"
 	"os"
-	"time"
 )
-
-type Config struct {
-	ApiFetchInterval int `json:"api_fetch_interval"` // in seconds
-	EnabledApiEndpoints []string `json:"enabled_api_endpoints"`
-	PersistentDataFilePath string `json:"datafile"`
-	LogLevel int `json:"loglevel"`
-	Recipients []Recipient `json:"recipients"`
-	SmtpConfiguration SmtpSettings `json:"smtp"`
-	Template MailTemplateConfig `json:"template"`
-}
-
-func NewConfig() Config {
-	// Initial config
-	c := Config{
-		ApiFetchInterval: 60 * 10, // every 10 minutes,
-		EnabledApiEndpoints: []string{"bay", "bund"},
-		PersistentDataFilePath: "data",
-		LogLevel: 2,
-		Recipients: []Recipient{},
-		SmtpConfiguration: SmtpSettings{
-			From: "from@example.org",
-			User: "from@example.org",
-			Password: "SiEhAbEnMiChInSgEsIcHtGeFiLmTdAsDüRfEnSiEnIcHt",
-			ServerHost: "example.org",
-			ServerPort: 587},
-		Template: MailTemplateConfig{
-			SubjectTemplate: "",
-			BodyTemplate: "",
-		},
-	}
-	return c
-}
-
-func checkConfig(config Config) {
-	if len(config.Recipients) < 1 {
-		logger.error("Configuration is incomplete")
-		panic(errors.New("no recipients are configured"))
-	}
-	for _, r := range config.Recipients {
-		if !mailAddressIsValid(r.Address) {
-			logger.error("Configuration includes invalid data")
-			panic(errors.New("'" + r.Address + "' is not a valid e-mail address"))
-		}
-		if len(r.Filters) < 1 {
-			logger.error("Configuration is incomplete")
-			panic(errors.New("recipient " + r.Address + " has no filter defined - at least {'any': true/false} should be configured"))
-		}
-	}
-	if !mailAddressIsValid(config.SmtpConfiguration.From) {
-		logger.error("Configuration includes invalid data")
-		panic(errors.New("'" + config.SmtpConfiguration.From + "' is not a valid e-mail address"))
-	}
-}
-
-type PersistentData struct {
-	// {endpoint id 1: time last published, endpoint id 2: ..., ...}
-	LastPublished map[string]time.Time `json:"last_published"`
-}
-
-func NewPersistentData(c Config) PersistentData {
-	// Initial persistent data
-	d := PersistentData{LastPublished: map[string]time.Time{}}
-	for _, e := range apiEndpoints {
-		d.LastPublished[e.Id] = time.Now().Add(-time.Hour * 24) // a day ago
-	}
-	return d
-}
 
 type DataStore struct {
 	filepath string
@@ -92,32 +23,24 @@ func (ds *DataStore) save() error {
 	} else {
 		data, err = json.Marshal(ds.data)
 	}
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	err = os.WriteFile(ds.filepath, data, ds.fileMode)
 	return err
 }
 
 func (ds *DataStore) load() error {
 	data, err := os.ReadFile(ds.filepath)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	switch ds.data.(type) {
 	case Config:
 		d, _ := ds.data.(Config);
 		err = json.Unmarshal(data, &d)
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		ds.data = d
 	case PersistentData:
 		d, _ := ds.data.(PersistentData);
 		err = json.Unmarshal(data, &d)
-		if err != nil {
-			return err
-		}
+		if err != nil { return err }
 		ds.data = d
 	}
 	return err

@@ -24,3 +24,6 @@ dist/
 data
 config
 *.bak
+
+# Config/data files
+*.json

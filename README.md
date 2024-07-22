@@ -17,7 +17,7 @@ This Software only supports Linux.
 # Build
 
 To cross-compile the software for `i386`, `amd64`, `arm` and `arm64`, run `build.sh`.  
-You need a go version >= 1.21 and git.
+You need Go 1.22.x and git.
 
 # Usage
 
@@ -34,7 +34,7 @@ Example:
 ```json
 {
   "api_fetch_interval": 600,
-  "datafile": "data",
+  "datafile": "data.json",
   "enabled_api_endpoints": [
     "bay",
     "bund"
@@ -67,9 +67,9 @@ To show debug messages, set the `loglevel` to `3`.
 
 ## Filters
 
-You define filters for notices to be sent per recipient. Multiple filters can be set per recipient and multiple criteria can be used per filter. The configuration field for those filters is `include`. See [Configuration](#configuration) for an example.
+You define filters for notices to be sent (per recipient). Multiple filters can be set per recipient and multiple criteria can be used per filter. The configuration field for those filters is `include`. See [Configuration](#configuration) for an example.
 
-It is determined by the following logic, if a notice is included:
+If a notice is included is determined by the following logic:
 
 ```
 {criteria, criteria, ... ALL APPLY}
@@ -77,7 +77,7 @@ OR {criteria, criteria, ... ALL APPLY}
 OR ...
 ```
 
-The following criteria are available. Criteria marked with `*` are for optional fields that are not supported by every API endpoint (e.g. https://wid.lsi.bayern.de) - notices from those endpoints will therefore not be included when using those criteria in filters.
+The following criteria are available. Criteria marked with * are optional fields that are not supported by every API endpoint (e.g. https://wid.lsi.bayern.de) - notices from those endpoints will therefore not be included when using those criteria in filters.
 
 ```json
 "include": [
@@ -122,7 +122,7 @@ Classification can be `"kritisch"`, `"hoch"`, `"mittel"` or `"niedrig"`.
 ```
 If set to `""`, this criteria will be ignored.
 
-### min_basescore `*`
+### min_basescore *
 
 Include notices whose basescore (`0` - `100`) is >= `min_basescore`.
 
@@ -131,7 +131,7 @@ Include notices whose basescore (`0` - `100`) is >= `min_basescore`.
 ```
 This criteria will be ignored if set to `0`.
 
-### status `*`
+### status *
 
 Include notices with this status. This is usually either `NEU` or `UPDATE`.
 
@@ -140,7 +140,7 @@ Include notices with this status. This is usually either `NEU` or `UPDATE`.
 ```
 If set to `""`, this criteria will be ignored.
 
-### products_contain `*`
+### products_contain *
 
 Include notices whose product list contains this text.
 
@@ -149,7 +149,7 @@ Include notices whose product list contains this text.
 ```
 If set to `""`, this criteria will be ignored.
 
-### no_patch `*`
+### no_patch *
 
 If set to `"true"`, notices where no patch is available will be included.
 

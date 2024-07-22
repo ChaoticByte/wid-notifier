@@ -57,9 +57,7 @@ func (e ApiEndpoint) getNotices(since time.Time) ([]WidNotice, time.Time, error)
 	if err == nil {
 		if res.StatusCode == 200 {
 			resBody, err := io.ReadAll(res.Body)
-			if err != nil {
-				return []WidNotice{}, since, err
-			}
+			if err != nil { return []WidNotice{}, since, err }
 			var decodedData map[string]interface{}
 			if err = json.Unmarshal(resBody, &decodedData); err != nil {
 				return []WidNotice{}, since, err
