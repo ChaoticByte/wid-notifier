@@ -26,7 +26,16 @@ Affected Products:{{ range $product := .ProductNames }}
 
 Assigned CVEs:{{ range $cve := .Cves }}
   - {{ $cve }} -> https://www.cve.org/CVERecord?id={{ $cve }}
-{{- end }}{{ end }}`
+{{- end }}{{ end }}
+
+
+Sent by WidNotifier {{ .WidNotifierVersion }}
+`
+
+type TemplateData struct {
+	WidNotice
+	WidNotifierVersion string
+}
 
 type MailTemplateConfig struct {
 	SubjectTemplate string `json:"subject"`
@@ -38,14 +47,14 @@ type MailTemplate struct {
 	BodyTemplate template.Template
 }
 
-func (t MailTemplate) generate(notice WidNotice) (MailContent, error) {
+func (t MailTemplate) generate(data TemplateData) (MailContent, error) {
 	c := MailContent{}
 	buffer := &bytes.Buffer{}
-	err := t.SubjectTemplate.Execute(buffer, notice)
+	err := t.SubjectTemplate.Execute(buffer, data)
 	if err != nil { return c, err }
 	c.Subject = buffer.String()
 	buffer.Truncate(0) // we can recycle our buffer
-	err = t.BodyTemplate.Execute(buffer, notice)
+	err = t.BodyTemplate.Execute(buffer, data)
 	if err != nil { return c, err }
 	c.Body = buffer.String()
 	return c, nil

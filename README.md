@@ -1,4 +1,4 @@
-# WID Notifier
+# WidNotifier
 
 The German [BSI](https://www.bsi.bund.de/) and [LSI Bavaria](https://lsi.bayern.de/) each have a page listing current security notices.  
 This software queries the APIs of these services for new security notices and sends configurable email notifications.
@@ -201,5 +201,7 @@ type WidNotice struct {
   PortalUrl string
 }
 ```
+
+Additionally, the field `WidNotifierVersion` holds the version of the software.
 
 For an example, take a look at `DEFAULT_SUBJECT_TEMPLATE` and `DEFAULT_BODY_TEMPLATE` in [template.go](./template.go).

@@ -61,7 +61,7 @@ func (r Recipient) sendNotices(notices []WidNotice, template MailTemplate, auth 
 			data = cacheResult
 		} else {
 			cacheMisses++
-			mailContent, err := template.generate(n)
+			mailContent, err := template.generate(TemplateData{n, Version})
 			if err != nil {
 				logger.error("Could not create mail from template")
 				logger.error(err)

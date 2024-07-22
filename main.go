@@ -16,7 +16,10 @@ func main() {
 	// get cli arguments
 	args := os.Args
 	if len(args) < 2 {
-		fmt.Printf("Usage: %v <configfile>\nIf the config file doesn't exist, a incomplete configuration with default values is created.\n", args[0])
+		fmt.Printf( "Usage: %v <configfile>\n\nIf the config file doesn't exist, an incomplete \n" +
+					"configuration with default values is created.\n\nVersion: %s\n",
+					args[0],
+					Version)
 		os.Exit(1)
 	}
 	configFilePath := os.Args[1]
