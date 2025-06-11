@@ -25,16 +25,6 @@ type WidNotice struct {
 	PortalUrl string
 }
 
-// func (n WidNotice) serialized() ([]byte, error) {
-// 	return json.Marshal(n)
-// }
-
-// func NewWidNoticeFromJSON(data []byte) (WidNotice, error) {
-// 	n := WidNotice{}
-// 	err := json.Unmarshal(data, &n)
-// 	return n, err
-// }
-
 func noticeSliceContains(notices []WidNotice, notice WidNotice) bool {
 	for _, x := range notices {
 		if x.Uuid == notice.Uuid {

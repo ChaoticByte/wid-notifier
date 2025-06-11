@@ -66,7 +66,7 @@ func (r Recipient) sendNotices(notices []WidNotice, template MailTemplate, auth 
 				logger.error("Could not create mail from template")
 				logger.error(err)
 			}
-			// serialize & send mail
+			// serialize mail
 			data = mailContent.serializeValidMail(smtpConfig.From, r.Address)
 			// add to cache
 			(*cache)[n.Uuid] = data
