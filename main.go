@@ -10,19 +10,39 @@ import (
 	"time"
 )
 
+var executableName string
 var logger Logger
+
+
+func showVersion() {
+	fmt.Printf("wid-notifier %s\n", Version)
+}
+
+func showHelp() {
+	fmt.Printf("Usage: %v <configfile>\n\nIf the config file doesn't exist, an incomplete \n" +
+			   "configuration with default values is created.\n\n",
+			   executableName)
+	showVersion()
+}
 
 func main() {
 	// get cli arguments
 	args := os.Args
+	executableName = args[0]
 	if len(args) < 2 {
-		fmt.Printf( "Usage: %v <configfile>\n\nIf the config file doesn't exist, an incomplete \n" +
-					"configuration with default values is created.\n\nVersion: %s\n",
-					args[0],
-					Version)
+		showHelp()
 		os.Exit(1)
 	}
-	configFilePath := os.Args[1]
+	for _, arg := range args {
+		if arg == "-h" || arg == "--help" {
+			showHelp()
+			os.Exit(0)
+		} else if arg == "--version" {
+			showVersion()
+			os.Exit(0)
+		}
+	}
+	configFilePath := args[1]
 	// create logger
 	logger = NewLogger(2)
 	// init
