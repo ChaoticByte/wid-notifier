@@ -97,7 +97,8 @@ func main() {
 	for {
 		t1 := time.Now().UnixMilli()
 		newNotices := []WidNotice{}
-		cache := map[string][]byte{}
+		lastPublished := map[string]time.Time{} // endpoint id : last published timestamp
+		cache := map[string][]byte{}            // cache generated emails for reuse
 		for _, a := range enabledApiEndpoints {
 			logger.info("Querying endpoint '" + a.Id + "' for new notices ...")
 			n, t, err := a.getNotices(persistent.data.(PersistentData).LastPublished[a.Id])
@@ -113,14 +114,14 @@ func main() {
 				logger.error(err)
 			} else if len(n) > 0 {
 				newNotices = append(newNotices, n...)
-				persistent.data.(PersistentData).LastPublished[a.Id] = t
-				persistent.save()
+				lastPublished[a.Id] = t
 			}
 		}
 		logger.debug(fmt.Sprintf("Got %v new notices", len(newNotices)))
 		if len(newNotices) > 0 {
 			logger.info("Sending email notifications ...")
 			recipientsNotified := 0
+			var err error
 			for _, r := range config.Recipients {
 				// Filter notices for this recipient
 				filteredNotices := []WidNotice{}
@@ -134,14 +135,22 @@ func main() {
 				slices.Reverse(filteredNotices)
 				logger.debug(fmt.Sprintf("Including %v of %v notices for recipient %v", len(filteredNotices), len(newNotices), r.Address))
 				// Send notices
-				err := r.sendNotices(filteredNotices, mailTemplate, mailAuth, config.SmtpConfiguration, &cache)
+				err = r.sendNotices(filteredNotices, mailTemplate, mailAuth, config.SmtpConfiguration, &cache)
 				if err != nil {
 					logger.error(err)
 				} else {
 					recipientsNotified++
 				}
 			}
-			logger.info(fmt.Sprintf("Email notifications sent to %v of %v recipients", recipientsNotified, len(config.Recipients)))
+			if recipientsNotified < 1 && err != nil {
+				logger.error("Couldn't send any mail notification!")
+			} else {
+				for id, t := range lastPublished {
+					persistent.data.(PersistentData).LastPublished[id] = t
+					persistent.save()
+				}
+				logger.info(fmt.Sprintf("Email notifications sent to %v of %v recipients", recipientsNotified, len(config.Recipients)))
+			}
 		}
 		dt := int(time.Now().UnixMilli() - t1)
 		time.Sleep(time.Millisecond * time.Duration((config.ApiFetchInterval * 1000) - dt))
