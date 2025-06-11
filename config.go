@@ -11,7 +11,7 @@ type Config struct {
 	EnabledApiEndpoints []string `json:"enabled_api_endpoints"`
 	PersistentDataFilePath string `json:"datafile"`
 	LogLevel int `json:"loglevel"`
-	Recipients []Recipient `json:"recipients"`
+	Lists *[]NotifyList `json:"lists"`
 	SmtpConfiguration SmtpSettings `json:"smtp"`
 	Template MailTemplateConfig `json:"template"`
 }
@@ -23,12 +23,16 @@ func NewConfig() Config {
 		EnabledApiEndpoints: []string{"bay", "bund"},
 		PersistentDataFilePath: "data.json",
 		LogLevel: 2,
-		Recipients: []Recipient{},
+		Lists: &[]NotifyList{
+			{ Name: "Example List",
+			  Recipients: []string{},
+			  Filter: []Filter{},},
+		},
 		SmtpConfiguration: SmtpSettings{
-			From: "from@example.org",
-			User: "from@example.org",
-			Password: "SiEhAbEnMiChInSgEsIcHtGeFiLmTdAsDüRfEnSiEnIcHt",
-			ServerHost: "example.org",
+			From: "user@localhost",
+			User: "user@localhost",
+			Password: "change me :)",
+			ServerHost: "127.0.0.1",
 			ServerPort: 587},
 		Template: MailTemplateConfig{
 			SubjectTemplate: "",
@@ -39,18 +43,20 @@ func NewConfig() Config {
 }
 
 func checkConfig(config Config) {
-	if len(config.Recipients) < 1 {
+	if len(*config.Lists) < 1 {
 		logger.error("Configuration is incomplete")
-		panic(errors.New("no recipients are configured"))
+		panic(errors.New("no lists are configured"))
 	}
-	for _, r := range config.Recipients {
-		if !mailAddressIsValid(r.Address) {
-			logger.error("Configuration includes invalid data")
-			panic(errors.New("'" + r.Address + "' is not a valid e-mail address"))
-		}
-		if len(r.Filters) < 1 {
+	for _, l := range *config.Lists {
+		if len(l.Filter) < 1 {
 			logger.error("Configuration is incomplete")
-			panic(errors.New("recipient " + r.Address + " has no filter defined - at least {'any': true/false} should be configured"))
+			panic(errors.New("list " + l.Name + " has no filter defined - at least [{'any': true/false}] should be configured"))
+		}
+		for _, r := range l.Recipients {
+			if !mailAddressIsValid(r) {
+				logger.error("Configuration includes invalid data")
+				panic(errors.New("'" + r + "' is not a valid e-mail address"))
+			}
 		}
 	}
 	if !mailAddressIsValid(config.SmtpConfiguration.From) {

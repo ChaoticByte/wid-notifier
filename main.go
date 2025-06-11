@@ -120,22 +120,35 @@ func main() {
 		logger.debug(fmt.Sprintf("Got %v new notices", len(newNotices)))
 		if len(newNotices) > 0 {
 			logger.info("Sending email notifications ...")
+			// mail recipient : pointer to slice of wid notices to be sent
+			noticesToBeSent := map[string][]WidNotice{}
 			recipientsNotified := 0
 			var err error
-			for _, r := range config.Recipients {
-				// Filter notices for this recipient
-				filteredNotices := []WidNotice{}
-				for _, f := range r.Filters {
+			for _, l := range *config.Lists {
+				// Filter notices for this list
+				for _, f := range l.Filter {
 					for _, n := range f.filter(newNotices) {
-						if !noticeSliceContains(filteredNotices, n) {
-							filteredNotices = append(filteredNotices, n)
+						for _, r := range l.Recipients {
+							if !noticeSliceContains(noticesToBeSent[r], n) {
+								noticesToBeSent[r] = append(noticesToBeSent[r], n)
+							}
 						}
 					}
 				}
-				slices.Reverse(filteredNotices)
-				logger.debug(fmt.Sprintf("Including %v of %v notices for recipient %v", len(filteredNotices), len(newNotices), r.Address))
-				// Send notices
-				err = r.sendNotices(filteredNotices, mailTemplate, mailAuth, config.SmtpConfiguration, &cache)
+			}
+			for r, notices := range noticesToBeSent {
+				// sort by publish date
+				slices.SortFunc(notices, func(a WidNotice, b WidNotice) int {
+					if a.Published == b.Published {
+						return 0
+					} else if a.Published.After(b.Published) {
+						return 1
+					} else {
+						return -1
+					}
+				})
+				// send
+				err = sendNotices(r, notices, mailTemplate, mailAuth, config.SmtpConfiguration, &cache)
 				if err != nil {
 					logger.error(err)
 				} else {
@@ -149,7 +162,7 @@ func main() {
 					persistent.data.(PersistentData).LastPublished[id] = t
 					persistent.save()
 				}
-				logger.info(fmt.Sprintf("Email notifications sent to %v of %v recipients", recipientsNotified, len(config.Recipients)))
+				logger.info(fmt.Sprintf("Email notifications sent to %v of %v recipients", recipientsNotified, len(noticesToBeSent)))
 			}
 		}
 		dt := int(time.Now().UnixMilli() - t1)

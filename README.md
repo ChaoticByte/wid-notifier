@@ -34,27 +34,28 @@ Example:
 ```json
 {
   "api_fetch_interval": 600,
-  "datafile": "data.json",
   "enabled_api_endpoints": [
     "bay",
     "bund"
   ],
+  "datafile": "data.json",
   "loglevel": 2,
-  "recipients": [
+  "lists": [
     {
-      "address": "guenther@example.org",
-      "include": [
-        {"classification": "kritisch"},
-        {"title_contains": "jQuery"}
+      "name": "Example List",
+      "recipients": ["someone@example.org"],
+      "filter": [
+        {"classification": "hoch", "title_contains": "Microsoft"},
+        {"classification": "kritisch"}
       ]
     }
   ],
   "smtp": {
-    "from": "from@example.org",
-    "host": "example.org",
+    "from": "user@localhost",
+    "host": "127.0.0.1",
     "port": 587,
-    "user": "from@example.org",
-    "password": "SiEhAbEnMiChInSgEsIcHtGeFiLmTdAsDüRfEnSiEnIcHt"
+    "user": "user@localhost",
+    "password": "change me :)"
   },
   "template": {
     "subject": "",

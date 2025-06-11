@@ -23,21 +23,22 @@ func (c MailContent) serializeValidMail(from string, to string) []byte {
 	// and I'm too lazy to encode ä into =E4 and so on
 	subjectEncoded := base64.StdEncoding.EncodeToString([]byte(c.Subject))
 	bodyEncoded := base64.StdEncoding.EncodeToString([]byte(c.Body))
-	data := []byte(fmt.Sprintf(
+	data := fmt.Appendf(nil, 
 		"Content-Type: text/plain; charset=\"utf-8\"\r\nContent-Transfer-Encoding: base64\r\nFrom: %v%vTo: %v%vSubject: =?utf-8?b?%v?=%v%v%v",
 		from, MAIL_LINE_SEP,
 		to, MAIL_LINE_SEP,
 		subjectEncoded, MAIL_LINE_SEP,
 		MAIL_LINE_SEP,
-		bodyEncoded))
+		bodyEncoded)
 	// done, I guess
 	return data
 }
 
-type Recipient struct {
-	Address string `json:"address"`
+type NotifyList struct {
+	Name string `json:"name"`
+	Recipients []string `json:"recipients"`
 	// Must be a configured filter id
-	Filters []Filter `json:"include"`
+	Filter []Filter `json:"filter"`
 }
 
 type SmtpSettings struct {
@@ -48,8 +49,8 @@ type SmtpSettings struct {
 	Password string `json:"password"`
 }
 
-func (r Recipient) sendNotices(notices []WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, cache *map[string][]byte) error {
-	logger.debug("Generating and sending mails to " + r.Address + " ...")
+func sendNotices(recipient string, notices []WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, cache *map[string][]byte) error {
+	logger.debug("Generating and sending mails for recipient " + recipient + " ...")
 	cacheHits := 0
 	cacheMisses := 0
 	mails := [][]byte{}
@@ -67,7 +68,7 @@ func (r Recipient) sendNotices(notices []WidNotice, template MailTemplate, auth 
 				logger.error(err)
 			}
 			// serialize mail
-			data = mailContent.serializeValidMail(smtpConfig.From, r.Address)
+			data = mailContent.serializeValidMail(smtpConfig.From, recipient)
 			// add to cache
 			(*cache)[n.Uuid] = data
 		}
@@ -77,11 +78,11 @@ func (r Recipient) sendNotices(notices []WidNotice, template MailTemplate, auth 
 	err := sendMails(
 		smtpConfig,
 		auth,
-		r.Address,
+		recipient,
 		mails,
 	)
 	if err != nil { return err }
-	logger.debug("Successfully sent all mails to " + r.Address)
+	logger.debug("Successfully sent all mails to " + recipient)
 	return nil
 }
 
