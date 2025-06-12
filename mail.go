@@ -49,7 +49,7 @@ type SmtpSettings struct {
 	Password string `json:"password"`
 }
 
-func sendNotices(recipient string, notices []WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, cache *map[string][]byte) error {
+func sendNotices(recipient string, notices []*WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, cache *map[string][]byte) error {
 	logger.debug("Generating and sending mails for recipient " + recipient + " ...")
 	cacheHits := 0
 	cacheMisses := 0

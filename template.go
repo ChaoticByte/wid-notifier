@@ -33,7 +33,7 @@ Sent by WidNotifier {{ .WidNotifierVersion }}
 `
 
 type TemplateData struct {
-	WidNotice
+	*WidNotice
 	WidNotifierVersion string
 }
 

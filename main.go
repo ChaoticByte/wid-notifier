@@ -121,16 +121,17 @@ func main() {
 		if len(newNotices) > 0 {
 			logger.info("Sending email notifications ...")
 			// mail recipient : pointer to slice of wid notices to be sent
-			noticesToBeSent := map[string][]WidNotice{}
+			noticesToBeSent := map[string][]*WidNotice{}
 			recipientsNotified := 0
 			var err error
 			for _, l := range *config.Lists {
 				// Filter notices for this list
 				for _, f := range l.Filter {
 					for _, n := range f.filter(newNotices) {
+						np := &n
 						for _, r := range l.Recipients {
-							if !noticeSliceContains(noticesToBeSent[r], n) {
-								noticesToBeSent[r] = append(noticesToBeSent[r], n)
+							if !noticeSliceContains(noticesToBeSent[r], np) {
+								noticesToBeSent[r] = append(noticesToBeSent[r], np)
 							}
 						}
 					}
@@ -138,7 +139,7 @@ func main() {
 			}
 			for r, notices := range noticesToBeSent {
 				// sort by publish date
-				slices.SortFunc(notices, func(a WidNotice, b WidNotice) int {
+				slices.SortFunc(notices, func(a *WidNotice, b *WidNotice) int {
 					if a.Published == b.Published {
 						return 0
 					} else if a.Published.After(b.Published) {

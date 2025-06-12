@@ -25,7 +25,7 @@ type WidNotice struct {
 	PortalUrl string
 }
 
-func noticeSliceContains(notices []WidNotice, notice WidNotice) bool {
+func noticeSliceContains(notices []*WidNotice, notice *WidNotice) bool {
 	for _, x := range notices {
 		if x.Uuid == notice.Uuid {
 			return true
