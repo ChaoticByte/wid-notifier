@@ -4,14 +4,14 @@ package main
 
 import (
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
+	"mime"
+	"mime/quotedprintable"
 	"net/mail"
 	"net/smtp"
+	"strings"
 	"time"
 )
-
-const MAIL_LINE_SEP = "\r\n"
 
 type MailContent struct {
 	Subject string
@@ -19,18 +19,18 @@ type MailContent struct {
 }
 
 func (c MailContent) serializeValidMail(from string, to string) []byte {
-	// We'll send base64 encoded Subject & Body, because we Dschörmäns have umlauts
-	// and I'm too lazy to encode ä into =E4 and so on
-	subjectEncoded := base64.StdEncoding.EncodeToString([]byte(c.Subject))
-	bodyEncoded := base64.StdEncoding.EncodeToString([]byte(c.Body))
+	// format subject using Q Encoding from RFC2047
+	subjectEncoded := mime.QEncoding.Encode("utf-8", c.Subject)
+	// format body using Quoted-Printable Encoding from RFC2045
+	var bodyEncoded strings.Builder
+	bew := quotedprintable.NewWriter(&bodyEncoded)
+	bew.Write([]byte(c.Body))
+	bew.Close()
+	// glue it all together
 	data := fmt.Appendf(nil, 
-		"Content-Type: text/plain; charset=\"utf-8\"\r\nContent-Transfer-Encoding: base64\r\nFrom: %v%vTo: %v%vSubject: =?utf-8?b?%v?=%v%v%v",
-		from, MAIL_LINE_SEP,
-		to, MAIL_LINE_SEP,
-		subjectEncoded, MAIL_LINE_SEP,
-		MAIL_LINE_SEP,
-		bodyEncoded)
-	// done, I guess
+		"Content-Type: text/plain; charset=\"utf-8\"\r\nContent-Transfer-Encoding: Quoted-Printable\r\nFrom: %v\r\nTo: %v\r\nSubject: %v\r\n\r\n%v",
+		from, to, subjectEncoded, bodyEncoded.String(),
+	)
 	return data
 }
 
