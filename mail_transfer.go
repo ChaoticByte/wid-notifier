@@ -11,7 +11,7 @@ import (
 )
 
 
-func sendMails(smtpConf SmtpSettings, auth smtp.Auth, to string, data [][]byte) error {
+func sendMails(smtpConf SmtpSettings, auth smtp.Auth, to string, mails []*MailContent) error {
 	addr := fmt.Sprintf("%v:%v", smtpConf.ServerHost, smtpConf.ServerPort)
 	logger.debug("Connecting to mail server at " + addr + " ...")
 	connection, err := smtp.Dial(addr)
@@ -32,7 +32,10 @@ func sendMails(smtpConf SmtpSettings, auth smtp.Auth, to string, data [][]byte) 
 	if logger.LogLevel >= 3 {
 		fmt.Printf("DEBUG %v Sending mails to server ", time.Now().Format("2006/01/02 15:04:05.000000"))
 	}
-	for _, d := range data {
+	for _, mc := range mails {
+		// serialize mail
+		d := mc.serializeValidMail(smtpConf.From, to)
+		// send mail
 		err = connection.Mail(smtpConf.From)
 		if err != nil { return err }
 		err = connection.Rcpt(to)

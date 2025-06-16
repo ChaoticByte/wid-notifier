@@ -47,30 +47,30 @@ type SmtpSettings struct {
 	Password string `json:"password"`
 }
 
-func sendNotices(recipient string, notices []*WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, cache *map[string][]byte) error {
+func sendNotices(recipient string, notices []*WidNotice, template MailTemplate, auth smtp.Auth, smtpConfig SmtpSettings, mailContentCache *map[string]*MailContent) error {
 	logger.debug("Generating and sending mails for recipient " + recipient + " ...")
 	cacheHits := 0
 	cacheMisses := 0
-	mails := [][]byte{}
+	mails := []*MailContent{}
 	for _, n := range notices {
-		var data []byte
-		cacheResult := (*cache)[n.Uuid]
-		if len(cacheResult) > 0 {
+		var mc *MailContent
+		cacheResult := (*mailContentCache)[n.Uuid]
+		if cacheResult != nil {
 			cacheHits++
-			data = cacheResult
+			mc = cacheResult
 		} else {
 			cacheMisses++
-			mailContent, err := template.generate(TemplateData{n, Version})
+			mc_, err := template.generate(TemplateData{n, Version})
 			if err != nil {
 				logger.error("Could not create mail from template")
 				logger.error(err)
+			} else {
+				mc = &mc_
+				// add to cache
+				(*mailContentCache)[n.Uuid] = mc
 			}
-			// serialize mail
-			data = mailContent.serializeValidMail(smtpConfig.From, recipient)
-			// add to cache
-			(*cache)[n.Uuid] = data
 		}
-		mails = append(mails, data)
+		mails = append(mails, mc)
 	}
 	logger.debug(fmt.Sprintf("%v mail cache hits, %v misses", cacheHits, cacheMisses))
 	err := sendMails(

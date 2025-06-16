@@ -98,7 +98,7 @@ func main() {
 		t1 := time.Now().UnixMilli()
 		newNotices := []WidNotice{}
 		lastPublished := map[string]time.Time{} // endpoint id : last published timestamp
-		cache := map[string][]byte{}            // cache generated emails for reuse
+		cache := map[string]*MailContent{}      // cache generated emails for reuse
 		for _, a := range enabledApiEndpoints {
 			logger.info("Querying endpoint '" + a.Id + "' for new notices ...")
 			n, t, err := a.getNotices(persistent.data.(PersistentData).LastPublished[a.Id])
