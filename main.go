@@ -34,10 +34,11 @@ func main() {
 		os.Exit(1)
 	}
 	for _, arg := range args {
-		if arg == "-h" || arg == "--help" {
+		switch arg {
+		case "-h", "--help":
 			showHelp()
 			os.Exit(0)
-		} else if arg == "--version" {
+		case "--version":
 			showVersion()
 			os.Exit(0)
 		}
@@ -140,7 +141,7 @@ func main() {
 			for r, notices := range noticesToBeSent {
 				// sort by publish date
 				slices.SortFunc(notices, func(a *WidNotice, b *WidNotice) int {
-					if a.Published == b.Published {
+					if a.Published.Equal(b.Published) {
 						return 0
 					} else if a.Published.After(b.Published) {
 						return 1
